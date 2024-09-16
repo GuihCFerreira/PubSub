@@ -11,7 +11,7 @@ public class DBUtils {
     public DBUtils() throws SQLException {
     }
 
-    public void insertOrderInDB (Order order){
+    public void insertOnDB (Order order){
         try {
            insertCustomer(order.getCustomer());
            insertOrder(order);
@@ -25,18 +25,18 @@ public class DBUtils {
     }
 
     private void insertSKU(Sku sku){
-        String insertSkuSQL = "INSERT INTO TB_SKU (id, value) VALUES (?, ?) ON CONFLICT (id) DO NOTHING";
+        String insertSkuSQL = "CALL sku_iu(?, ?)";
         try (PreparedStatement ps = db.prepareStatement(insertSkuSQL)) {
             ps.setString(1, sku.getId());
             ps.setDouble(2, sku.getValue());
-            ps.executeUpdate();
+            ps.execute();
         } catch (SQLException e) {
             throw new RuntimeException("Erro no SKU" +e);
         }
     }
 
     private void insertCustomer(Customer customer){
-        String insertCustomerSQL = "INSERT INTO TB_CUSTOMER (id, name) VALUES (?, ?) ON CONFLICT (id) DO NOTHING";
+        String insertCustomerSQL = "CALL customer_iu(?, ?)";
         try (PreparedStatement ps = db.prepareStatement(insertCustomerSQL)) {
             ps.setInt(1, customer.getId());
             ps.setString(2, customer.getName());
@@ -47,7 +47,7 @@ public class DBUtils {
     }
 
     private void insertOrder(Order order){
-        String insertOrderSQL = "INSERT INTO TB_ORDER (id, order_type, created_at, customer_id) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO NOTHING";
+        String insertOrderSQL = "CALL order_iu(?, ?, ?, ?)";
         try (PreparedStatement ps = db.prepareStatement(insertOrderSQL)) {
             ps.setString(1, order.getUuid());
             ps.setString(2, order.getType());
@@ -60,7 +60,7 @@ public class DBUtils {
     }
 
     private void insertOrderItem(OrderItem item, String orderId){
-        String insertOrderItemSQL = "INSERT INTO TB_ORDER_ITEM (id, order_id, sku_id, quantity, category_id, sub_category_id) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING";
+        String insertOrderItemSQL = "CALL order_item_iu(?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = db.prepareStatement(insertOrderItemSQL)) {
             ps.setInt(1, item.getId());
             ps.setString(2, orderId);

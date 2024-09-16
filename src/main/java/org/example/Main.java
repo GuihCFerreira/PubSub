@@ -24,7 +24,6 @@ public class Main {
         String projectId = "serjava-demo";
         String subscriptionId = "sobrancelha-sub";
 
-
         try {
             Connection db = DBConnection.getConnection();
             if (db != null && !db.isClosed()) {
@@ -44,7 +43,6 @@ public class Main {
                 (PubsubMessage message, AckReplyConsumer consumer) -> {
 
                     try {
-                        Connection db = DBConnection.getConnection();
                         JsonNode jsonNode = objectMapper.readTree(message.getData().toStringUtf8());
 
                         //Valida se a mensagem retornada é um JSON
@@ -52,18 +50,10 @@ public class Main {
 
                             //Converte esse JSON para minha classe Order
                             Order order = objectMapper.readValue(message.getData().toStringUtf8(), Order.class);
-                            System.out.println("Ordem desserializada: " + order.toString());
-
-                            /*String insertCustomerSQL = "INSERT INTO TB_CUSTOMER (id, name) VALUES (?, ?) ON CONFLICT (id) DO NOTHING";
-                            try (PreparedStatement ps = db.prepareStatement(insertCustomerSQL)) {
-                                ps.setInt(1, order.getCustomer().getId());
-                                ps.setString(2, order.getCustomer().getName());
-                                ps.executeUpdate();
-                            }*/
-
                             DBUtils dbUtils = new DBUtils();
-                            dbUtils.insertOrderInDB(order);
+                            dbUtils.insertOnDB(order);
 
+                            System.out.println("Sucesso ao gravar mensagens no banco de dados!");
 
                         }
                     } catch (Exception e) {
